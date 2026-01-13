@@ -5,7 +5,6 @@ import {
   combineIvAndEncrypted, splitIvAndEncrypted,
   arrayBufferToBase64, base64ToArrayBuffer, hashPassword
 } from './lib/crypto'
-import { uploadEncryptedFile, downloadFromFileIO, encodeFileKey, decodeFileKey } from './lib/fileio'
 import { FileText, Upload, Copy, Check, Lock, Trash2, Shield, Clock, X, Eye, PenLine, Settings, KeyRound, Link2, Timer, Github } from 'lucide-react'
 import './index.css'
 
@@ -132,7 +131,9 @@ function ViewShare({ shareId, encryptionKey }: { shareId: string; encryptionKey:
 
       if (new Date(share.expiry_time) < new Date()) {
         await supabase.from('shares').delete().eq('id', shareId)
-        // Note: File on external storage will auto-expire
+        if (share.file_path) {
+          await supabase.storage.from('encrypted-files').remove([share.file_path])
+        }
         setStatus('expired')
         return
       }
@@ -145,7 +146,9 @@ function ViewShare({ shareId, encryptionKey }: { shareId: string; encryptionKey:
       // Check max views
       if (share.max_views !== null && share.view_count >= share.max_views) {
         await supabase.from('shares').delete().eq('id', shareId)
-        // Note: File on external storage will auto-expire
+        if (share.file_path) {
+          await supabase.storage.from('encrypted-files').remove([share.file_path])
+        }
         setStatus('expired')
         return
       }
@@ -187,10 +190,13 @@ function ViewShare({ shareId, encryptionKey }: { shareId: string; encryptionKey:
         const text = new TextDecoder().decode(decrypted)
         setContent({ type: 'text', data: text })
       } else {
-        // Decode the file key and download from external storage
-        const fileKey = decodeFileKey(share.file_path)
-        const combined = await downloadFromFileIO(fileKey)
+        const { data: fileData, error } = await supabase.storage
+          .from('encrypted-files')
+          .download(share.file_path)
 
+        if (error || !fileData) throw new Error('File not found')
+
+        const combined = await fileData.arrayBuffer()
         const { iv, encrypted } = splitIvAndEncrypted(combined)
         const decrypted = await decryptData(encrypted, iv, key)
         const blob = new Blob([decrypted])
@@ -204,7 +210,9 @@ function ViewShare({ shareId, encryptionKey }: { shareId: string; encryptionKey:
       
       if (shouldDelete) {
         await supabase.from('shares').update({ is_read: true, view_count: newViewCount }).eq('id', share.id)
-        // Note: File on external storage will auto-expire based on its own settings
+        if (share.file_path) {
+          await supabase.storage.from('encrypted-files').remove([share.file_path])
+        }
       } else {
         await supabase.from('shares').update({ view_count: newViewCount }).eq('id', share.id)
       }
@@ -453,23 +461,21 @@ function CreateShare() {
         const combined = combineIvAndEncrypted(iv, encrypted)
         setProgress(50)
 
-        // Upload encrypted file to external storage (hidden from user)
-        const expiryMins = expiryMinutes ? parseInt(expiryMinutes, 10) : undefined
-        const uploadResult = await uploadEncryptedFile(
-          combined,
-          `${Date.now()}-${crypto.randomUUID()}`,
-          expiryMins
-        )
-        setProgress(80)
+        const filePath = `${Date.now()}-${crypto.randomUUID()}`
+        const { error: uploadError } = await supabase.storage
+          .from('encrypted-files')
+          .upload(filePath, new Blob([combined]), {
+            contentType: 'application/octet-stream',
+          })
 
-        // Store only the encoded reference in database, not the actual storage URL
-        const encodedRef = encodeFileKey(uploadResult.key)
+        if (uploadError) throw uploadError
+        setProgress(80)
 
         const { data, error } = await supabase
           .from('shares')
           .insert({
             type: 'file',
-            file_path: encodedRef, // Encoded reference, not direct URL
+            file_path: filePath,
             file_name: file.name,
             file_size: file.size,
             encryption_key_hint: keyString.substring(0, 8),
