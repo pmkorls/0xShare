@@ -602,18 +602,47 @@ function CreateShare() {
     <div className="min-h-screen flex flex-col bg-void">
       <ParticleBackground />
       
-      <header className="glass-header fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-50">
-        <span 
-          className="logo-text flex items-center gap-2 text-xl font-bold tracking-tight"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        >
-          <Shield className="w-5 h-5 text-accent-primary" />
-          0xShare
-        </span>
+      <header className="fixed top-4 left-4 right-4 z-50">
+        <nav className="navbar-glass max-w-4xl mx-auto rounded-2xl px-4 py-3 flex items-center justify-between">
+          <span 
+            className="logo-text flex items-center gap-2.5 text-lg font-semibold tracking-tight cursor-pointer group"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <div className="logo-icon-wrapper w-8 h-8 rounded-lg bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all duration-300">
+              <Shield className="w-4 h-4 text-white" />
+            </div>
+            <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">0xShare</span>
+          </span>
+          
+          <div className="flex items-center gap-1">
+            <a
+              href="https://github.com/AESEncryptor/0xShare"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-icon-btn group relative w-9 h-9 rounded-xl flex items-center justify-center text-white/50 hover:text-white transition-all duration-300 cursor-pointer"
+              aria-label="GitHub"
+            >
+              <div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-all duration-300" />
+              <Github className="w-[18px] h-[18px] relative z-10" />
+            </a>
+            <a
+              href="https://x.com/0xShare"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-icon-btn group relative w-9 h-9 rounded-xl flex items-center justify-center text-white/50 hover:text-white transition-all duration-300 cursor-pointer"
+              aria-label="X (Twitter)"
+            >
+              <div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-all duration-300" />
+              <svg className="w-[16px] h-[16px] relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+          </div>
+        </nav>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pt-16 pb-8">
-        <div className="text-center mb-8 relative z-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pt-24 pb-8">
+        <div className="text-center mb-8 mt-8 relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{ letterSpacing: '-0.02em' }}>
             Private text and file sharing.
           </h1>
