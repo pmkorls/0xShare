@@ -616,7 +616,7 @@ function CreateShare() {
           
           <div className="flex items-center gap-1">
             <a
-              href="https://github.com/AESEncryptor/0xShare"
+              href="https://github.com/privatex0/0xShare"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-icon-btn group relative w-9 h-9 rounded-xl flex items-center justify-center text-white/50 hover:text-white transition-all duration-300 cursor-pointer"
@@ -626,7 +626,7 @@ function CreateShare() {
               <Github className="w-[18px] h-[18px] relative z-10" />
             </a>
             <a
-              href="https://x.com/0xShare"
+              href="https://x.com/zeroxshare"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-icon-btn group relative w-9 h-9 rounded-xl flex items-center justify-center text-white/50 hover:text-white transition-all duration-300 cursor-pointer"
